@@ -4,7 +4,7 @@
 // @icon         https://passthepopcorn.me/favicon.ico
 // @version      2024-07-28
 // @description  Enhanced features for PassThePopcorn (adds a copy title button, hide trailer button, and can change brackets to parantheses in titles)
-// @match        https://passthepopcorn.me/torrents.php?id=*
+// @match        https://passthepopcorn.me/torrents.php*
 // @require      https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -43,6 +43,11 @@
                 'label': 'Enable Hide Trailer Feature',
                 'type': 'checkbox',
                 'default': true
+            },
+            'copyButtonAfterParentheses': {
+                'label': 'Place Copy Button After Parentheses',
+                'type': 'checkbox',
+                'default': false
             }
         },
         'events': {
@@ -51,7 +56,6 @@
             }
         }
     });
-
 
     // Register menu command to open config
     GM_registerMenuCommand('PTP Enhanced Settings', function() {
@@ -82,33 +86,71 @@
             htmlContent = htmlContent.replace(/\[/g, '(').replace(/\]/g, ')');
             pageTitleElement.innerHTML = htmlContent;
         }
+
+        let yearElements = document.querySelectorAll('.basic-movie-list__movie__year');
+        yearElements.forEach(element => {
+            let htmlContent = element.innerHTML;
+            htmlContent = htmlContent.replace(/\[/g, '(').replace(/\]/g, ')');
+            element.innerHTML = htmlContent;
+        });
     }
 
     function addCopyTitleButton() {
-        addFontAwesome();
+    addFontAwesome();
 
-        setTimeout(() => {
-            const pageTitleElement = document.querySelector('.page__title');
-            if (pageTitleElement) {
-                const button = document.createElement('button');
-                button.id = 'copyButton';
-                button.innerHTML = '<i class="fas fa-copy"></i>';
-                button.style.color = '#6c757d';
-                button.style.fontSize = '12px';
-                button.style.padding = '5px';
-                button.style.paddingLeft = '10px';
-                button.style.paddingTop = '0px';
-                button.style.paddingRight = '0px';
-                button.style.paddingBottom = '0px';
-                button.style.background = 'none';
-                button.style.border = 'none';
-                button.style.cursor = 'pointer';
+    setTimeout(() => {
+        const pageTitleElement = document.querySelector('.page__title');
+        if (pageTitleElement) {
+            const button = document.createElement('button');
+            button.id = 'copyButton';
+            button.innerHTML = '<i class="fas fa-copy"></i>';
+            button.style.color = '#6c757d';
+            button.style.fontSize = '12px';
+            button.style.padding = '5px';
+            button.style.paddingLeft = '10px';
+            button.style.paddingTop = '0px';
+            button.style.paddingRight = '5px';  // Added right padding
+            button.style.paddingBottom = '0px';
+            button.style.marginRight = '0px';    // Added right margin for extra space
+            button.style.background = 'none';
+            button.style.border = 'none';
+            button.style.cursor = 'pointer';
 
-                button.addEventListener('click', copyText);
+            button.addEventListener('click', copyText);
+
+            if (GM_config.get('copyButtonAfterParentheses')) {
+                const titleContent = pageTitleElement.innerHTML;
+                const endIndex = Math.max(titleContent.lastIndexOf(')'), titleContent.lastIndexOf(']'));
+                if (endIndex !== -1) {
+                    const titlePart = titleContent.substring(0, endIndex + 1);
+                    const restPart = titleContent.substring(endIndex + 1);
+
+                    // Create a temporary container
+                    const tempContainer = document.createElement('div');
+                    tempContainer.innerHTML = restPart;
+
+                    // Clear the original content
+                    pageTitleElement.innerHTML = '';
+
+                    // Add the title part
+                    pageTitleElement.insertAdjacentHTML('beforeend', titlePart);
+
+                    // Add the copy button
+                    pageTitleElement.appendChild(button);
+
+                    // Add the rest of the content
+                    while (tempContainer.firstChild) {
+                        pageTitleElement.appendChild(tempContainer.firstChild);
+                    }
+                } else {
+                    pageTitleElement.appendChild(button);
+                }
+            } else {
                 pageTitleElement.appendChild(button);
             }
-        }, 1000);
-    }
+        }
+    }, 1000);
+}
 
     function copyText() {
     const pageTitleElement = document.querySelector('.page__title');
@@ -143,35 +185,36 @@
     }
 }
 
-
     function updateButtonState() {
-        const button = document.getElementById('copyButton');
-        if (button) {
-            button.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            button.style.color = '#28a745';
+    const button = document.getElementById('copyButton');
+    if (button) {
+        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        button.style.color = '#28a745';
+        button.style.fontSize = '12px';
+        button.style.paddingLeft = '10px';
+        button.style.paddingTop = '0px';
+        button.style.paddingRight = '5px';  // Updated
+        button.style.paddingBottom = '0px';
+        button.style.marginRight = '0px';    // Added
+        button.style.background = 'none';
+        button.style.border = 'none';
+        button.style.cursor = 'default';
+
+        setTimeout(() => {
+            button.innerHTML = '<i class="fas fa-copy"></i>';
+            button.style.color = '#6c757d';
             button.style.fontSize = '12px';
             button.style.paddingLeft = '10px';
             button.style.paddingTop = '0px';
-            button.style.paddingRight = '0px';
+            button.style.paddingRight = '5px';  // Updated
             button.style.paddingBottom = '0px';
+            button.style.marginRight = '0px';    // Added
             button.style.background = 'none';
             button.style.border = 'none';
-            button.style.cursor = 'default';
-
-            setTimeout(() => {
-                button.innerHTML = '<i class="fas fa-copy"></i>';
-                button.style.color = '#6c757d';
-                button.style.fontSize = '12px';
-                button.style.paddingLeft = '10px';
-                button.style.paddingTop = '0px';
-                button.style.paddingRight = '0px';
-                button.style.paddingBottom = '0px';
-                button.style.background = 'none';
-                button.style.border = 'none';
-                button.style.cursor = 'pointer';
-            }, 2000);
-        }
+            button.style.cursor = 'pointer';
+        }, 2000);
     }
+}
 
     function addFontAwesome() {
         const link = document.createElement('link');
