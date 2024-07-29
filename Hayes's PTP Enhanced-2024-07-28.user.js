@@ -2,10 +2,12 @@
 // @name         Hayes's PTP Enhanced
 // @author       hayes
 // @icon         https://passthepopcorn.me/favicon.ico
-// @version      2024-07-28
+// @version      2024-07-29 1.1
 // @description  Enhanced features for PassThePopcorn (adds a copy title button, hide trailer button, and can change brackets to parantheses in titles)
 // @match        https://passthepopcorn.me/torrents.php*
 // @require      https://openuserjs.org/src/libs/sizzle/GM_config.js
+// @downloadURL    https://github.com/H-ayes/ptp-userscript/raw/main/Hayes's%20PTP%20Enhanced-2024-07-28.user.js
+// @updateURL    https://github.com/H-ayes/ptp-userscript/raw/main/Hayes's%20PTP%20Enhanced-2024-07-28.user.js
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
